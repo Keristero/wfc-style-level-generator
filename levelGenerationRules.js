@@ -42,7 +42,7 @@ let levelGenerationRules = {
         name:"Tree Top Right",
         allowed:{
             "1":{
-                "0":[270]
+                "0":[270,1]
             },
             "-1":{
                 "0":[270],

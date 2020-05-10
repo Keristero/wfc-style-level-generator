@@ -10,6 +10,24 @@ class Level{
         }
         this.scale = 2
     }
+    clearTiles(){
+        this.tiles = {}
+    }
+    async loadTiledMapJSON(jsonPath){
+        let response = await GetRequest(jsonPath)
+        let tiledMap = JSON.parse(response)
+        let layerIndexToLoad = 0
+        let layer = tiledMap.layers[layerIndexToLoad]
+        this.tiles = {}
+        for(let x = 0; x < layer.width; x++){
+            for(let y = 0; y < layer.height; y++){
+                let oneDimensionalIndex = (y*layer.width)+x
+                let loadedTileID = layer.data[oneDimensionalIndex]-1
+                setCoordinate(this.tiles,x,y,loadedTileID)
+            }
+        }
+        console.log('tiledMap',this.tiles)
+    }
     async LoadTileSheet(path){
         this.tileSheetImage = await LoadImage(path)
         this.tileSheetColumns = this.tileSheetImage.naturalWidth/this.tileSize
@@ -30,7 +48,7 @@ class Level{
                 let worldX = parseInt(x)*this.tileSize*this.scale
                 let worldY = parseInt(y)*this.tileSize*this.scale
                 ctx.drawImage(this.tileSheetImage,sheet.x,sheet.y,this.tileSize,this.tileSize,worldX,worldY,this.tileSize*this.scale,this.tileSize*this.scale)
-                ctx.fillText(tileID,worldX,worldY+10,16)
+                ctx.fillText(tileID,worldX,worldY+10,this.tileSize*this.scale)
             }
         }
     }
