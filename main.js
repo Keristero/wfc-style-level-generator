@@ -8,11 +8,10 @@ let ruleGenerator = new RuleGenerator()
 async function Setup(){
     ctx.imageSmoothingEnabled= false
     await level.LoadTileSheet(`emerald_tiles.png`)
-    await level.loadTiledMapJSON(`test-tiled-map.json`)
+    await level.loadTiledMapJSON(`training-map.json`)
     let rules = ruleGenerator.generateRules(level.tiles)
     level.clearTiles()
-    setCoordinate(level.tiles,0,0,1)
-    setCoordinate(level.tiles,1,0,1)
+    await level.loadTiledMapJSON(`incomplete-map.json`)
     await levelGenerator.Generate(level.tiles,rules)
 }
 

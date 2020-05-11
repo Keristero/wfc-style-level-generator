@@ -13,9 +13,9 @@ class LevelGenerator{
         let generationFinished = this.GenerationIteration()
         while(!generationFinished){
             generationFinished = this.GenerationIteration()
-            level.Draw(ctx)
-            level.DrawPossibilities(ctx,this.possibilities)
-            await AsyncSleep(1)
+            //level.Draw(ctx)
+            //level.DrawPossibilities(ctx,this.possibilities)
+            //await AsyncSleep(1)
         }
     }
     GenerationIteration(){
@@ -29,9 +29,39 @@ class LevelGenerator{
             return true
         }
     }
+    CountPossibilities(){
+        let sum = 0
+        for(let x in this.possibilities){
+            for(let y in this.possibilities[x]){
+                sum += this.possibilities[x][y].length
+            }
+        }
+        return sum
+    }
+    CollapseTilePossibilitiesHighestCompatibility(tile){
+        let highestPossibilities = 0
+        let bestTileID = ":("
+        for(let collapsedTileId of tile.possibilities){
+            setCoordinate(this.tiles,tile.x,tile.y,collapsedTileId)
+            let possibilities = this.CountPossibilities()
+            if(possibilities > highestPossibilities){
+                bestTileID = collapsedTileId
+                highestPossibilities = possibilities
+            }else if(possibilities == highestPossibilities){
+                if(Math.random() > 0.5){
+                    //If tile is tied for best, 50/50 chance to use it
+                    bestTileID = collapsedTileId
+                }
+                bestTileID = collapsedTileId
+            }
+        }
+        setCoordinate(this.tiles,tile.x,tile.y,bestTileID)
+        return bestTileID
+    }
     CollapseTilePossibilitiesRandomly(tile){
         let collapsedTileId = tile.possibilities[Math.floor(Math.random() * tile.possibilities.length)]
         setCoordinate(this.tiles,tile.x,tile.y,collapsedTileId)
+        return collapsedTileId
     }
     ScanForPossibilities(){
         let possibilities = {}
@@ -75,7 +105,7 @@ class LevelGenerator{
                 let realX = parseInt(x)+parseInt(relX)
                 let realY = parseInt(y)+parseInt(relY)
                 
-                if(realX > this.width || realY > this.height || realX < 0 || realY < 0){
+                if(realX >= this.width || realY >= this.height || realX < 0 || realY < 0){
                     //If rule is outside bounds, dont add possibility
                     continue
                 }

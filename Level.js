@@ -23,7 +23,9 @@ class Level{
             for(let y = 0; y < layer.height; y++){
                 let oneDimensionalIndex = (y*layer.width)+x
                 let loadedTileID = layer.data[oneDimensionalIndex]-1
-                setCoordinate(this.tiles,x,y,loadedTileID)
+                if(loadedTileID != -1){
+                    setCoordinate(this.tiles,x,y,loadedTileID)
+                }
             }
         }
         console.log('tiledMap',this.tiles)
