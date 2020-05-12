@@ -2,7 +2,7 @@ class RuleGenerator{
     constructor(){
 
     }
-    generateRules(tiles,allowedRuleRadius=1,bannedRuleRadius=1){
+    generateRules(tiles,allowedRuleRadius=1,bannedRuleRadius=2){
         this.tiles = tiles;
         this.allowedRuleRadius = allowedRuleRadius
         this.bannedRuleRadius = bannedRuleRadius

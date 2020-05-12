@@ -13,15 +13,16 @@ class LevelGenerator{
         let generationFinished = this.GenerationIteration()
         while(!generationFinished){
             generationFinished = this.GenerationIteration()
-            //level.Draw(ctx)
-            //level.DrawPossibilities(ctx,this.possibilities)
-            //await AsyncSleep(1)
+            level.Draw(ctx)
+            level.DrawPossibilities(ctx,this.possibilities)
+            await AsyncSleep(1)
         }
     }
     GenerationIteration(){
         this.possibilities = this.ScanForPossibilities()
         //console.log(`Possibilities=`,this.possibilities)
         let lowestEntropyTile = this.FindLowestEntropyTile()
+        console.log(lowestEntropyTile)
         //console.log(`lowest entropy tile = `,lowestEntropyTile)
         if(lowestEntropyTile){
             this.CollapseTilePossibilitiesRandomly(lowestEntropyTile)
@@ -65,6 +66,7 @@ class LevelGenerator{
     }
     ScanForPossibilities(){
         let possibilities = {}
+        //this.AllowAllTiles(possibilities)
         for(let x in this.tiles){
             for(let y in this.tiles[x]){
                 let tileID = this.tiles[x][y]
@@ -97,6 +99,19 @@ class LevelGenerator{
         }
         //Return a random tile from the lowest entropy list
         return lowestEntropyTiles[Math.floor(Math.random() * lowestEntropyTiles.length)]; 
+    }
+    AllowAllTiles(possibilities){
+        let allTiles = Object.keys(this.rules)
+        for(let tileID of allTiles){
+            tileID = parseInt(tileID)
+        }
+        for(let x = 0; x < this.width; x++){
+            for(let y = 0; y < this.height; y++){
+                if(!this.tiles[x] || !this.tiles[x][y]){
+                    concatToCoordinate(possibilities,x,y,allTiles)
+                }
+            }
+        }
     }
     ApplyAllowedRules(x,y,tileID,possibilities){
         let allowedTiles = this.rules[tileID].allowed
