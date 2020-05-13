@@ -2,7 +2,7 @@ class RuleGenerator{
     constructor(){
 
     }
-    generateRules(tiles,allowedRuleRadius=1,bannedRuleRadius=2){
+    generateRules(tiles,allowedRuleRadius=1,bannedRuleRadius=1){
         this.tiles = tiles;
         this.allowedRuleRadius = allowedRuleRadius
         this.bannedRuleRadius = bannedRuleRadius
@@ -23,8 +23,17 @@ class RuleGenerator{
             this.trimRules(this.rules[tileID].allowed,this.allowedRuleRadius)
             this.trimRules(this.rules[tileID].banned,this.bannedRuleRadius)
         }
-        console.log("The emperor's new rules",this.rules)
-        return this.rules
+        
+        //Convert rules into an optimized format for the level generator
+        this.spriteIDs = Object.keys(this.rules)
+        for(let i in this.spriteIDs){
+            this.spriteIDs[i] = parseInt(this.spriteIDs[i])
+        }
+        console.log(this.spriteIDs)
+        console.log(this.rules)
+        let newRules = this.ExportLevelGeneratorRules(this.rules)
+        console.log("The emperor's new rules",newRules)
+        return newRules
     }
     trimRules(rules,maxRadius){
         for(let x in rules){
@@ -89,5 +98,37 @@ class RuleGenerator{
         }
         let tileRules = this.rules[forTileID]
         pushToCoordinateNonDuplicate(tileRules.allowed,x,y,subjectTileID)
+    }
+    GetPossibilityIndexById(spriteID){
+        console.log("in sprite id",spriteID)
+        let out = this.spriteIDs.indexOf(spriteID)
+        console.log("out",out)
+        return out
+    }
+    ExportLevelGeneratorRules(rules){
+        /* Optimize input rules for easy use */
+        let newRules = []
+        for(let spriteID in rules){
+            let allowed = rules[spriteID].allowed
+            let banned = rules[spriteID].banned
+
+            for(let x in allowed){
+                for(let y in allowed[x]){
+                    for(let i in allowed[x][y]){
+                        allowed[x][y][i] = this.GetPossibilityIndexById(allowed[x][y][i])
+                    }
+                }
+            }
+            for(let x in banned){
+                for(let y in banned[x]){
+                    for(let i in banned[x][y]){
+                        banned[x][y][i] = this.GetPossibilityIndexById(banned[x][y][i])
+                    }
+                }
+            }
+            let newTileInfo = {allowed:allowed,spriteID:spriteID}
+            newRules.push(newTileInfo)
+        }
+        return newRules
     }
 }

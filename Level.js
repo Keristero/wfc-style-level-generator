@@ -3,6 +3,7 @@ class Level{
         this.tileSize = tileSize
         this.width = mapSize
         this.height = mapSize
+        this.useSpriteIDs = false
         this.tiles = {
             0:{
                 0:270
@@ -30,6 +31,24 @@ class Level{
         }
         console.log('tiledMap',this.tiles)
     }
+    ConvertLevelFormat(rules){
+        this.spriteIDs = {}
+        let tileIDs = {}
+        this.useSpriteIDs = true
+        for(let tileIndex in rules){
+            let spriteID = parseInt(rules[tileIndex].spriteID)
+            tileIDs[spriteID] = tileIndex
+            this.spriteIDs[tileIndex] = spriteID
+        }
+        console.log('tile ids',tileIDs)
+        //Convert existing tiles to new IDs
+        for(let x in this.tiles){
+            for(let y in this.tiles[x]){
+                this.tiles[x][y] = tileIDs[this.tiles[x][y]]
+            }
+        }
+        console.log("tiles",this.tiles)
+    }
     async LoadTileSheet(path){
         this.tileSheetImage = await LoadImage(path)
         this.tileSheetColumns = this.tileSheetImage.naturalWidth/this.tileSize
@@ -46,24 +65,37 @@ class Level{
         for(let x in this.tiles){
             for(let y in this.tiles[x]){
                 let tileID = this.tiles[x][y]
-                let sheet = this.getTileSheetPosById(tileID)
+                let spriteID = tileID
+                if(this.useSpriteIDs){
+                    spriteID = this.spriteIDs[tileID]
+                }
+                let sheet = this.getTileSheetPosById(spriteID)
                 let worldX = parseInt(x)*this.tileSize*this.scale
                 let worldY = parseInt(y)*this.tileSize*this.scale
                 ctx.drawImage(this.tileSheetImage,sheet.x,sheet.y,this.tileSize,this.tileSize,worldX,worldY,this.tileSize*this.scale,this.tileSize*this.scale)
-                ctx.fillText(tileID,worldX,worldY+10,this.tileSize*this.scale)
+                ctx.fillText(spriteID,worldX,worldY+10,this.tileSize*this.scale)
             }
         }
     }
-    DrawPossibilities(ctx,possibilities){
-        ctx.globalAlpha = 0.2;
-        for(let x in possibilities){
-            for(let y in possibilities[x]){
-                for(let tileID of possibilities[x][y]){
-                    let sheet = this.getTileSheetPosById(tileID)
-                    let worldX = parseInt(x)*this.tileSize*this.scale
-                    let worldY = parseInt(y)*this.tileSize*this.scale
-                    ctx.drawImage(this.tileSheetImage,sheet.x,sheet.y,this.tileSize,this.tileSize,worldX,worldY,this.tileSize*this.scale,this.tileSize*this.scale)
+    DrawPossibilities(ctx,positionPossibilities){
+        ctx.globalAlpha = 0.4;
+        for(let x in positionPossibilities){
+            for(let y in positionPossibilities[x]){
+                let worldX = parseInt(x)*this.tileSize*this.scale
+                let worldY = parseInt(y)*this.tileSize*this.scale
+                let sum = 0
+                for(let tileIndex in positionPossibilities[x][y]){
+                    if(positionPossibilities[x][y][tileIndex] === true){
+                        sum++
+                        let spriteID = tileIndex
+                        if(this.useSpriteIDs){
+                            spriteID = this.spriteIDs[tileIndex]
+                        }
+                        let sheet = this.getTileSheetPosById(spriteID)
+                        ctx.drawImage(this.tileSheetImage,sheet.x,sheet.y,this.tileSize,this.tileSize,worldX,worldY,this.tileSize*this.scale,this.tileSize*this.scale)
+                    }
                 }
+                ctx.fillText(sum,worldX,worldY-this.tileSize)
             }
         }
         ctx.globalAlpha = 1;
