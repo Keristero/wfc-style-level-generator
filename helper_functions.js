@@ -61,18 +61,8 @@ function arrayRemove(arr, value) {
     return arr.filter(function(ele){ return ele != value; });
 }
 
-function pushToCoordinate(grid,x,y,value){
-    if(!grid[x]){
-        grid[x] = {}
-    }
-    if(!grid[x][y]){
-        grid[x][y] = []
-    }
-    grid[x][y].push(value)
-}
-
 function getCoordinate(grid,x,y){
-    if(grid[x] && typeof(grid[x][y]) == "number"){
+    if(grid[x] && grid[x][y]){
         return grid[x][y]
     }else{
         return null

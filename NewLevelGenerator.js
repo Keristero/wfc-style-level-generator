@@ -14,16 +14,13 @@ class NewLevelGenerator{
         this.ApplyPrexistingPositions()
     
         //Use tiles provided and rules provided to discover which tiles are allowed to go where, add these to possibilities
+        const t0 = performance.now();
         let generationFinished = this.GenerationIteration()
         while(!generationFinished){
             generationFinished = this.GenerationIteration()
-            //level.Draw(ctx)
-            /*
-            level.Draw(ctx)
-            level.DrawPossibilities(ctx,this.positionPossibilities)
-            await AsyncSleep(10)
-            */
         }
+        const t1 = performance.now();
+        console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
         level.Draw(ctx)
         level.DrawPossibilities(ctx,this.positionPossibilities)
     }
@@ -65,7 +62,7 @@ class NewLevelGenerator{
         let possibilities = this.positionPossibilities[x][y]
         for(let relX = -1; relX <= 1; relX++){
             for(let relY = -1; relY <= 1; relY++){
-                if(relX == 0 && relY == 0){
+                if(relX === 0 && relY === 0){
                     //Skip current position
                     continue
                 }
@@ -87,9 +84,9 @@ class NewLevelGenerator{
             return
         }
         //We need to check if any of the possible tile ids in this tile are no longer possible
-        let possibilitiesA = this.positionPossibilities[x][y]
+        const possibilitiesA = this.positionPossibilities[x][y]
         //Loop through all the tiles that could be here
-        for(let hereId in possibilitiesA){
+        for(const hereId in possibilitiesA){
             if(!possibilitiesA[hereId]){
                 continue
                 //Skip if impossible already
@@ -97,11 +94,11 @@ class NewLevelGenerator{
             //Keep track of the possibility of this tile id (hereId)
             let impossible = true
             //Loop through all the tiles that could be there
-            placable:for(let thereId in possibilitiesB){
+            placable:for(const thereId in possibilitiesB){
                 if(possibilitiesB[thereId]){
-                    let allowedIDs = this.rules[thereId].allowed[relX][relY]
                     //Loop through all the tiles that that tile there allows here
-                    for(let allowedId of allowedIDs){
+                    const allowed = this.rules[thereId].allowed[relX][relY]
+                    for(const allowedId of allowed){
                         //As soon as we find a tile that allows this tile here, return
                         if(allowedId == hereId){
                             impossible = false
@@ -110,7 +107,7 @@ class NewLevelGenerator{
                     }
                 }
             }
-            if(impossible == true){
+            if(impossible === true){
                 possibilitiesA[hereId] = false
                 //Note that we changed something, now we will have to check every surrounding tile against this one
                 changed = true
@@ -143,15 +140,15 @@ class NewLevelGenerator{
             for(let y in this.positions[x]){
                 y = parseInt(y)
                 this.SelectSinglePossibilityForPosition(x,y,this.positions[x][y])
-                console.log(`${x},${y} is ${this.positions[x][y]}`)
             }
         }
     }
     FindLowestEntropyPosition(){
+        //Large performance impact due to complexity
         let leastOptions = Infinity
         let lowestEntropyPositions = [null]
-        for(let x in this.positionPossibilities){
-            for(let y in this.positionPossibilities[x]){
+        for(const x in this.positionPossibilities){
+            for(const y in this.positionPossibilities[x]){
                 let tileOptions = this.positionPossibilities[x][y]
                 let optionCount = this.CountTrue(tileOptions)
                 if(optionCount > 1){
@@ -159,7 +156,7 @@ class NewLevelGenerator{
                         //If there is a new lowest entropy
                         leastOptions = optionCount
                         lowestEntropyPositions = [{x:parseInt(x),y:parseInt(y),entropy:leastOptions}]
-                    }else if(optionCount == leastOptions){
+                    }else if(optionCount === leastOptions){
                         //If position entropy matches lowest entropy position
                         lowestEntropyPositions.push({x:parseInt(x),y:parseInt(y),entropy:leastOptions})
                     }
@@ -170,9 +167,10 @@ class NewLevelGenerator{
         return lowestEntropyPositions[Math.floor(Math.random() * lowestEntropyPositions.length)]; 
     }
     CountTrue(array){
+        //Large performance impact due to FindLowestEntropyPosition
         let sum = 0
-        for(let i in array){
-            if(array[i]){
+        for(const bool of array){
+            if(bool){
                 sum++
             }
         }

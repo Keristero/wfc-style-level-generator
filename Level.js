@@ -73,14 +73,14 @@ class Level{
                 let worldX = parseInt(x)*this.tileSize*this.scale
                 let worldY = parseInt(y)*this.tileSize*this.scale
                 ctx.drawImage(this.tileSheetImage,sheet.x,sheet.y,this.tileSize,this.tileSize,worldX,worldY,this.tileSize*this.scale,this.tileSize*this.scale)
-                ctx.fillText(spriteID,worldX,worldY+10,this.tileSize*this.scale)
+                //ctx.fillText(spriteID,worldX,worldY+10,this.tileSize*this.scale)
             }
         }
     }
     DrawPossibilities(ctx,positionPossibilities){
-        ctx.globalAlpha = 0.4;
         for(let x in positionPossibilities){
             for(let y in positionPossibilities[x]){
+                ctx.globalAlpha = 0.4;
                 let worldX = parseInt(x)*this.tileSize*this.scale
                 let worldY = parseInt(y)*this.tileSize*this.scale
                 let sum = 0
@@ -95,6 +95,7 @@ class Level{
                         ctx.drawImage(this.tileSheetImage,sheet.x,sheet.y,this.tileSize,this.tileSize,worldX,worldY,this.tileSize*this.scale,this.tileSize*this.scale)
                     }
                 }
+                ctx.globalAlpha = 1;
                 ctx.fillText(sum,worldX,worldY-this.tileSize)
             }
         }
