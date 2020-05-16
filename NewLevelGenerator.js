@@ -76,6 +76,22 @@ class NewLevelGenerator{
             }
         }
     }
+    IsPossible(hereId,possibilitiesB,relX,relY){
+        //Loop through all the tiles that could be there
+        for(const thereId in possibilitiesB){
+            if(possibilitiesB[thereId]){
+                //Loop through all the tiles that that tile there allows here
+                const allowed = this.rules[thereId].allowed[relX][relY]
+                for(const allowedId of allowed){
+                    //As soon as we find a tile that allows this tile here, return
+                    if(allowedId == hereId){
+                        return false
+                    }
+                }
+            }
+        }
+        return true
+    }
     UpdatePositionBasedOnPossibilities(x,y,possibilitiesB,relX,relY){
         //Keep track of if we changed anything or not
         let changed = false
@@ -92,21 +108,8 @@ class NewLevelGenerator{
                 //Skip if impossible already
             }
             //Keep track of the possibility of this tile id (hereId)
-            let impossible = true
+            let impossible = this.IsPossible(hereId,possibilitiesB,relX,relY)
             //Loop through all the tiles that could be there
-            placable:for(const thereId in possibilitiesB){
-                if(possibilitiesB[thereId]){
-                    //Loop through all the tiles that that tile there allows here
-                    const allowed = this.rules[thereId].allowed[relX][relY]
-                    for(const allowedId of allowed){
-                        //As soon as we find a tile that allows this tile here, return
-                        if(allowedId == hereId){
-                            impossible = false
-                            continue placable
-                        }
-                    }
-                }
-            }
             if(impossible === true){
                 possibilitiesA[hereId] = false
                 //Note that we changed something, now we will have to check every surrounding tile against this one
