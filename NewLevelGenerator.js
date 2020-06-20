@@ -18,9 +18,12 @@ class NewLevelGenerator{
         let generationFinished = this.GenerationIteration()
         while(!generationFinished){
             generationFinished = this.GenerationIteration()
+            level.Draw(ctx)
+            level.DrawPossibilities(ctx,this.positionPossibilities)
+            await AsyncSleep(1)
         }
         const t1 = performance.now();
-        console.log(`Call to doSomething took ${t1 - t0} milliseconds.`);
+        console.log(`Generation took ${t1 - t0} milliseconds.`);
         level.Draw(ctx)
         level.DrawPossibilities(ctx,this.positionPossibilities)
     }
@@ -46,10 +49,9 @@ class NewLevelGenerator{
             }
         }
         let newTileId = options[Math.floor(Math.random() * options.length)];
-        this.SelectSinglePossibilityForPosition(x,y,newTileId)
-        setCoordinate(this.positions,x,y,newTileId)
+        this.ResolveTile(x,y,newTileId)
     }
-    SelectSinglePossibilityForPosition(x,y,tileID){
+    ResolveTile(x,y,tileID){
         //Remove all possibilities for this position, except for one
         let tile = this.positionPossibilities[x][y]
         for(let i = 0; i < tile.length; i++){
@@ -57,6 +59,7 @@ class NewLevelGenerator{
         }
         tile[tileID] = true
         this.UpdatePossibilitiesForTilesSurrounding(x,y)
+        setCoordinate(this.positions,x,y,tileID)
     }
     UpdatePossibilitiesForTilesSurrounding(x,y){
         let possibilities = this.positionPossibilities[x][y]
@@ -77,6 +80,7 @@ class NewLevelGenerator{
         }
     }
     IsPossible(hereId,possibilitiesB,relX,relY){
+        //Checks that tile with id (hereID) can be placed at (relX,relY) to a list of possible tiles 
         //Loop through all the tiles that could be there
         for(const thereId in possibilitiesB){
             if(possibilitiesB[thereId]){
@@ -102,6 +106,7 @@ class NewLevelGenerator{
         //We need to check if any of the possible tile ids in this tile are no longer possible
         const possibilitiesA = this.positionPossibilities[x][y]
         //Loop through all the tiles that could be here
+        let entropy = 0
         for(const hereId in possibilitiesA){
             if(!possibilitiesA[hereId]){
                 continue
@@ -114,14 +119,21 @@ class NewLevelGenerator{
                 possibilitiesA[hereId] = false
                 //Note that we changed something, now we will have to check every surrounding tile against this one
                 changed = true
+            }else{
+                entropy++
             }
         }
         if(changed){
+            if(entropy === 1){
+                this.RandomlyResolveTile(x,y)
+            }
+            if(entropy === 0){
+                throw(`Unresolvable tile ${x},${y}`)
+            }
             //add this tile to the queue to be tested
             this.queue.push({x:x,y:y})
         }
     }
-    UpdatedPossibilitiesBasedOn
     InitializeAllPositionPossibilities(){
         //Create a big ol array representing all the possible tiles for each grid position
         this.positionPossibilities = {}
@@ -142,11 +154,11 @@ class NewLevelGenerator{
             x = parseInt(x)
             for(let y in this.positions[x]){
                 y = parseInt(y)
-                this.SelectSinglePossibilityForPosition(x,y,this.positions[x][y])
+                this.ResolveTile(x,y,this.positions[x][y])
             }
         }
     }
-    FindLowestEntropyPosition(){
+    FindLowestEntropyPosition(){//TODO speed this one up
         //Large performance impact due to complexity
         let leastOptions = Infinity
         let lowestEntropyPositions = [null]
